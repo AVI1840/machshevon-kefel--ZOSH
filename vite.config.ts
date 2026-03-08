@@ -4,7 +4,7 @@ import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/machshevon-kefel--ZOSH/',
+  base: '/machshevon-kefel/',
   server: {
     host: "::",
     port: 8080,
