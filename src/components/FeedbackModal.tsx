@@ -16,6 +16,9 @@ interface FeedbackModalProps {
 const STORAGE_KEY = "btl-feedback-calculator-overlap";
 const PROJECT_NAME = "מחשבון כפל גמלאות";
 
+// הדבק כאן את ה-URL של Google Apps Script Web App
+const GOOGLE_SCRIPT_URL = "";
+
 type Category = "🐛 באג" | "💡 שיפור" | "📊 נתונים" | "🎨 עיצוב";
 type Severity = "קריטי" | "שיפור" | "קטן";
 
@@ -25,6 +28,28 @@ interface FeedbackEntry {
   severity: Severity | "";
   text: string;
   timestamp: string;
+  sent: boolean;
+}
+
+async function sendToSheet(entry: FeedbackEntry) {
+  if (!GOOGLE_SCRIPT_URL) return false;
+  try {
+    await fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        project: PROJECT_NAME,
+        category: entry.category,
+        severity: entry.severity,
+        text: entry.text,
+        userAgent: navigator.userAgent,
+      }),
+    });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
@@ -32,10 +57,26 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
   const [severity, setSeverity] = useState<Severity | "">("");
   const [text, setText] = useState("");
   const [items, setItems] = useState<FeedbackEntry[]>([]);
+  const [sending, setSending] = useState(false);
+  const [lastStatus, setLastStatus] = useState<"" | "ok" | "offline">("");
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) setItems(JSON.parse(saved));
+  }, [open]);
+
+  useEffect(() => {
+    if (!open || !GOOGLE_SCRIPT_URL) return;
+    const unsent = items.filter((i) => !i.sent);
+    if (!unsent.length) return;
+    Promise.all(unsent.map((i) => sendToSheet(i))).then((results) => {
+      const updated = items.map((item) => {
+        const idx = unsent.findIndex((u) => u.id === item.id);
+        if (idx >= 0 && results[idx]) return { ...item, sent: true };
+        return item;
+      });
+      save(updated);
+    });
   }, [open]);
 
   const save = (updated: FeedbackEntry[]) => {
@@ -43,19 +84,27 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!text.trim()) return;
+    setSending(true);
+    setLastStatus("");
     const entry: FeedbackEntry = {
       id: Date.now(),
       category,
       severity,
       text: text.trim(),
       timestamp: new Date().toISOString(),
+      sent: false,
     };
+    const ok = await sendToSheet(entry);
+    entry.sent = ok;
     save([entry, ...items]);
     setCategory("");
     setSeverity("");
     setText("");
+    setSending(false);
+    setLastStatus(ok ? "ok" : "offline");
+    setTimeout(() => setLastStatus(""), 3000);
   };
 
   const handleExport = () => {
@@ -107,7 +156,17 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
             <p className="text-sm font-medium mb-2 text-right">תיאור</p>
             <Textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="תאר את המשוב..." className="min-h-[80px] text-right" dir="rtl" />
           </div>
-          <Button onClick={handleSubmit} disabled={!text.trim()} className="w-full text-white" style={{ backgroundColor: "#1B3A5C" }}>שלח משוב</Button>
+          <div className="relative">
+            <Button onClick={handleSubmit} disabled={!text.trim() || sending} className="w-full text-white" style={{ backgroundColor: "#1B3A5C" }}>
+              {sending ? "שולח..." : "שלח משוב"}
+            </Button>
+            {lastStatus === "ok" && (
+              <p className="text-xs text-green-600 text-center mt-1">✅ נשלח בהצלחה</p>
+            )}
+            {lastStatus === "offline" && (
+              <p className="text-xs text-orange-500 text-center mt-1">📱 נשמר מקומית — יישלח כשיהיה חיבור</p>
+            )}
+          </div>
           {items.length > 0 && (
             <div className="border-t pt-3 space-y-2">
               <div className="flex items-center justify-between">
@@ -123,6 +182,8 @@ export function FeedbackModal({ open, onClose }: FeedbackModalProps) {
                     <div className="flex items-center gap-2 mb-1 flex-wrap justify-end">
                       {fb.category && <span className="text-xs px-2 py-0.5 rounded-full bg-[#1B3A5C]/10 text-[#1B3A5C] font-medium">{fb.category}</span>}
                       {fb.severity && <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${sevColor(fb.severity as Severity)}`}>{fb.severity}</span>}
+                      {!fb.sent && <span className="text-xs px-2 py-0.5 rounded-full bg-orange-100 text-orange-600">⏳ ממתין</span>}
+                      {fb.sent && <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-600">✅</span>}
                       <span className="text-xs text-gray-400">{new Date(fb.timestamp).toLocaleString("he-IL")}</span>
                     </div>
                     <p className="text-sm text-gray-800">{fb.text}</p>
