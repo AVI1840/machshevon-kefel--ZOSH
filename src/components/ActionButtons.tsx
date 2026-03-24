@@ -63,7 +63,7 @@ const ActionButtons = ({ result, benefits, input, onReset }: ActionButtonsProps)
     html += `</tr></thead><tbody>`;
     
     // Widow row
-    html += `<tr><td style="border: 1px solid #ccc; padding: 8px; font-weight: bold;">אלמן/נה</td>`;
+    html += `<tr><td style="border: 1px solid #ccc; padding: 8px; font-weight: bold;">עבורך</td>`;
     result.options.forEach(option => {
       const track = option.widowTrack === 'disability' ? 'קצבת נכות' : 'שאירים';
       const bgColor = option.widowTrack === 'disability' ? '#dbeafe' : '#dcfce7';
@@ -319,7 +319,7 @@ ${input.widow.isTemporaryDisability ? 'הערה: מאחר שדרגת אי-הכו
     });
     html += `</tr></thead><tbody>`;
     html += `<tr>`;
-    html += `<td dir="rtl" align="right" style="border: 1px solid #ccc; padding: 6px; font-weight: bold;">${g('אלמן/נה')}</td>`;
+    html += `<td dir="rtl" align="right" style="border: 1px solid #ccc; padding: 6px; font-weight: bold;">עבורך</td>`;
     result.options.forEach(option => {
       const track = option.widowTrack === 'disability' ? 'קצבת נכות' : 'שאירים';
       html += `<td dir="rtl" align="center" style="border: 1px solid #ccc; padding: 6px; text-align: center;">${track}<br/><b>${option.baseAmount.toLocaleString('he-IL')} ₪</b></td>`;

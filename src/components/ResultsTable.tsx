@@ -65,7 +65,7 @@ const ResultsTable = ({ result }: ResultsTableProps) => {
             <tr className="border-b border-border/50">
               <td className="py-3 px-4 text-muted-foreground flex items-center gap-2">
                 <Shield className="w-4 h-4" />
-                אלמן/נה
+                עבורך
               </td>
               {result.options.map((option) => (
                 <td key={option.id} className={cn(
