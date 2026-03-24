@@ -65,7 +65,7 @@ const ActionButtons = ({ result, benefits, input, onReset }: ActionButtonsProps)
     // Widow row
     html += `<tr><td style="border: 1px solid #ccc; padding: 8px; font-weight: bold;">אלמן/נה</td>`;
     result.options.forEach(option => {
-      const track = option.widowTrack === 'disability' ? 'נכות' : 'שאירים';
+      const track = option.widowTrack === 'disability' ? 'קצבת נכות' : 'שאירים';
       const bgColor = option.widowTrack === 'disability' ? '#dbeafe' : '#dcfce7';
       html += `<td style="border: 1px solid #ccc; padding: 8px; text-align: center;">
         <span style="background: ${bgColor}; padding: 2px 8px; border-radius: 4px; font-size: 12px;">${track}</span><br>
@@ -82,8 +82,15 @@ const ActionButtons = ({ result, benefits, input, onReset }: ActionButtonsProps)
         html += `<tr style="background: ${bgAlt};"><td style="border: 1px solid #ccc; padding: 8px;">👶 ${childName}</td>`;
         result.options.forEach(option => {
           const allocation = option.childAllocations[idx];
+          let track: string;
+          if (allocation?.track === 'disability') {
+            track = 'תוספת ילד תלוי בנכות';
+          } else if (option.widowTrack === 'disability') {
+            track = 'קצבת שאירים';
+          } else {
+            track = 'תוספת ילד בשאירים';
+          }
           const isDisability = allocation?.track === 'disability';
-          const track = isDisability ? 'ילד תלוי בנכות' : 'יתום בשאירים';
           const bgColor = isDisability ? '#dbeafe' : '#dcfce7';
           const amount = allocation?.amount || 0;
           html += `<td style="border: 1px solid #ccc; padding: 8px; text-align: center;">
@@ -121,15 +128,21 @@ const ActionButtons = ({ result, benefits, input, onReset }: ActionButtonsProps)
     result.options.forEach((option, index) => {
       const letter = ['א', 'ב', 'ג', 'ד'][index];
       text += `אפשרות ${letter}' - ${option.name}\n`;
-      const widowType = option.widowTrack === 'disability' ? 'קצבת נכות' : 'קצבת שאירים';
-      text += `  • אלמן/נה: ${widowType} ${option.baseAmount.toLocaleString('he-IL')} ₪\n`;
+      const widowType = option.widowTrack === 'disability' ? 'קצבת נכות' : 'שאירים';
+      text += `  • עבורך: [${widowType}] ${option.baseAmount.toLocaleString('he-IL')} ₪\n`;
       
       if (option.childAllocations) {
         option.childAllocations.forEach(childData => {
+          let trackLabel: string;
           if (childData.track === 'disability') {
-            text += `  • ${childData.name}: ילד תלוי בנכות +${childData.amount.toLocaleString('he-IL')} ₪\n`;
-          } else if (childData.track === 'survivors' && childData.amount > 0) {
-            text += `  • ${childData.name}: קצבת שאירים ${childData.amount.toLocaleString('he-IL')} ₪\n`;
+            trackLabel = 'תוספת ילד תלוי בנכות';
+          } else if (option.widowTrack === 'disability') {
+            trackLabel = 'קצבת שאירים';
+          } else {
+            trackLabel = 'תוספת ילד בשאירים';
+          }
+          if (childData.amount > 0) {
+            text += `  • ${childData.name}: [${trackLabel}] +${childData.amount.toLocaleString('he-IL')} ₪\n`;
           } else {
             text += `  • ${childData.name}: תוספת בקצבת שאירים\n`;
           }
@@ -149,7 +162,7 @@ const ActionButtons = ({ result, benefits, input, onReset }: ActionButtonsProps)
 
 אנו משתתפים בצערך על פטירת המנוח/ה.
 
-מבדיקת הנתונים עולה כי הינך זכאי/ת הן לקצבת שאירים והן לקצבת נכות כללית. לפי חוק הביטוח הלאומי (סעיף 320), לא ניתן לקבל את שתי הקצבאות במלואן באותה תקופה, אך החוק מאפשר לך לבחור את המסלול המתאים ביותר.
+מבדיקת הנתונים עולה כי הינך זכאי/ת הן לקצבת שאירים והן לקצבת נכות כללית. לפי חוק הביטוח הלאומי, סעיף 320, לא ניתן לקבל את שתי הקצבאות במלואן באותה תקופה, אך החוק מאפשר לך לבחור את המסלול המתאים ביותר.
 
 ${input.widow.isTemporaryDisability ? 'הערה: מאחר שדרגת אי-הכושר נקבעה באופן זמני, יש לשלם את הקצבה הגבוהה מבין האפשרויות.\n\n' : ''}${generateOptionsText()}
 ---
@@ -158,21 +171,21 @@ ${input.widow.isTemporaryDisability ? 'הערה: מאחר שדרגת אי-הכו
 
 `;
 
-    text += `🎁 מענקים רלוונטיים (במסלול שאירים):\n`;
+    text += `🎁 מענקים רלוונטיים - במסלול שאירים:\n`;
     benefits.grants.forEach(grant => {
       text += `  • ${grant.text}\n`;
     });
-    text += `  • מענק נישואין בעתיד (36 קצבאות חודשיות) - רלוונטי רק באפשרויות בהן את/ה במסלול שאירים. שים/י לב: עם תשלום מענק הנישואין תופסק הזכאות לקצבת שאירים עבורך.\n`;
+    text += `  • מענק נישואין בעתיד - 36 קצבאות חודשיות - רלוונטי רק באפשרויות בהן את/ה במסלול שאירים. שים/י לב: עם תשלום מענק הנישואין תופסק הזכאות לקצבת שאירים עבורך.\n`;
     text += `  • אפשרות לבחון זכאות לתוספת השלמת הכנסה\n`;
     text += `\n`;
 
-    text += `🔵 הטבות במסלול נכות כללית (לפי הנתונים שלך):\n`;
+    text += `🔵 הטבות במסלול נכות כללית - לפי הנתונים שלך:\n`;
     benefits.disability.forEach(b => {
       text += `  • ${b.text}\n`;
     });
     text += `\n`;
 
-    text += `💚 הטבות במסלול שאירים (לפי הנתונים שלך):\n`;
+    text += `💚 הטבות במסלול שאירים - לפי הנתונים שלך:\n`;
     if (benefits.survivors.length > 0) {
       benefits.survivors.forEach(b => {
         text += `  • ${b.text}\n`;
@@ -188,7 +201,7 @@ ${input.widow.isTemporaryDisability ? 'הערה: מאחר שדרגת אי-הכו
 • יש להשיב תוך 21 יום. אם לא תתקבל תשובה, תישלח תזכורת. אם לא תתקבל תשובה תוך 15 יום נוספים, נראה אותך כמי שבחר/ה בקצבה הנוכחית.
 • הבחירה ניתנת לשינוי בעתיד אם יחול שינוי בנסיבותייך.
 • אם תבחר/י בקצבת השאירים, ולאחר מכן זכאותך לקצבת שאירים תופסק - זכאותך לקצבת הנכות תתחדש מיד.
-• שים/י לב: אם את/ה מקבל/ת שר"מ (שירותים מיוחדים), בחירה בשאירים תפסיק את השר"מ הרגיל. יש לבדוק עם פקיד תביעות נכות כללית זכאות לשר"מ מיוחד - שר"מ מיוחד אינו כפל עם קצבת שאירים.
+• שים/י לב: אם את/ה מקבל/ת שר"מ - שירותים מיוחדים, בחירה בשאירים תפסיק את השר"מ הרגיל. יש לבדוק עם פקיד תביעות נכות כללית זכאות לשר"מ מיוחד - שר"מ מיוחד אינו כפל עם קצבת שאירים.
 • הסכומים מעודכנים לשנת 2026 בהתאם לחוזר תשלומים 33 וכפופים לשינויים.
 
 בברכה,
@@ -206,15 +219,21 @@ ${input.widow.isTemporaryDisability ? 'הערה: מאחר שדרגת אי-הכו
       html += `<p style="font-weight: bold; margin-bottom: 8px;">אפשרות ${letter}' - ${option.name}</p>`;
       html += `<ul style="margin: 0; padding-right: 20px; list-style-type: disc;">`;
       
-      const widowType = option.widowTrack === 'disability' ? 'קצבת נכות' : 'קצבת שאירים';
-      html += `<li>אלמן/נה: ${widowType} ${option.baseAmount.toLocaleString('he-IL')} ₪</li>`;
+      const widowType = option.widowTrack === 'disability' ? 'קצבת נכות' : 'שאירים';
+      html += `<li>עבורך: [${widowType}] ${option.baseAmount.toLocaleString('he-IL')} ₪</li>`;
       
       if (option.childAllocations) {
         option.childAllocations.forEach(childData => {
+          let trackLabel: string;
           if (childData.track === 'disability') {
-            html += `<li>${childData.name}: ילד תלוי בנכות +${childData.amount.toLocaleString('he-IL')} ₪</li>`;
-          } else if (childData.track === 'survivors' && childData.amount > 0) {
-            html += `<li>${childData.name}: קצבת שאירים ${childData.amount.toLocaleString('he-IL')} ₪</li>`;
+            trackLabel = 'תוספת ילד תלוי בנכות';
+          } else if (option.widowTrack === 'disability') {
+            trackLabel = 'קצבת שאירים';
+          } else {
+            trackLabel = 'תוספת ילד בשאירים';
+          }
+          if (childData.amount > 0) {
+            html += `<li>${childData.name}: [${trackLabel}] +${childData.amount.toLocaleString('he-IL')} ₪</li>`;
           } else {
             html += `<li>${childData.name}: תוספת בקצבת שאירים</li>`;
           }
@@ -236,7 +255,7 @@ ${input.widow.isTemporaryDisability ? 'הערה: מאחר שדרגת אי-הכו
     html += `<p style="text-align: right;"><strong>נושא: בחירה בין קצבת נכות כללית לקצבת שאירים</strong></p>`;
     html += `<p style="text-align: right;">שלום רב,</p>`;
     html += `<p style="text-align: right;">אנו משתתפים בצערך על פטירת המנוח/ה.</p>`;
-    html += `<p style="text-align: right;">מבדיקת הנתונים עולה כי הינך זכאי/ת הן לקצבת שאירים והן לקצבת נכות כללית. לפי חוק הביטוח הלאומי (סעיף 320), לא ניתן לקבל את שתי הקצבאות במלואן באותה תקופה, אך החוק מאפשר לך לבחור את המסלול המתאים ביותר.</p>`;
+    html += `<p style="text-align: right;">מבדיקת הנתונים עולה כי הינך זכאי/ת הן לקצבת שאירים והן לקצבת נכות כללית. לפי חוק הביטוח הלאומי, סעיף 320, לא ניתן לקבל את שתי הקצבאות במלואן באותה תקופה, אך החוק מאפשר לך לבחור את המסלול המתאים ביותר.</p>`;
     if (input.widow.isTemporaryDisability) {
       html += `<p style="text-align: right; background: #fff7ed; border: 1px solid #f97316; padding: 8px 12px; border-radius: 6px;"><strong>הערה: מאחר שדרגת אי-הכושר נקבעה באופן זמני, יש לשלם את הקצבה הגבוהה מבין האפשרויות.</strong></p>`;
     }
@@ -245,17 +264,17 @@ ${input.widow.isTemporaryDisability ? 'הערה: מאחר שדרגת אי-הכו
     html += `<h3 style="text-align: right;">מה עוד חשוב לקחת בחשבון?</h3>`;
     
     html += `<div style="background: #fef9c3; border: 1px solid #fbbf24; border-radius: 8px; padding: 12px; margin-bottom: 12px; text-align: right;">`;
-    html += `<h4 style="color: #92400e; margin: 0 0 8px 0;">🎁 מענקים רלוונטיים (במסלול שאירים):</h4>`;
+    html += `<h4 style="color: #92400e; margin: 0 0 8px 0;">🎁 מענקים רלוונטיים - במסלול שאירים:</h4>`;
     html += `<ul style="margin: 0; padding-right: 20px;">`;
     benefits.grants.forEach(grant => {
       html += `<li>${grant.text}</li>`;
     });
-    html += `<li>מענק נישואין בעתיד (36 קצבאות חודשיות) - <strong>רלוונטי רק באפשרויות בהן את/ה במסלול שאירים.</strong> שים/י לב: עם תשלום מענק הנישואין תופסק הזכאות לקצבת שאירים עבורך.</li>`;
+    html += `<li>מענק נישואין בעתיד - 36 קצבאות חודשיות - <strong>רלוונטי רק באפשרויות בהן את/ה במסלול שאירים.</strong> שים/י לב: עם תשלום מענק הנישואין תופסק הזכאות לקצבת שאירים עבורך.</li>`;
     html += `<li>אפשרות לבחון זכאות לתוספת השלמת הכנסה</li>`;
     html += `</ul></div>`;
     
     html += `<div style="background: #dbeafe; border: 1px solid #3b82f6; border-radius: 8px; padding: 12px; margin-bottom: 12px; text-align: right;">`;
-    html += `<h4 style="color: #1e40af; margin: 0 0 8px 0;">🔵 הטבות במסלול נכות כללית (לפי הנתונים שלך):</h4>`;
+    html += `<h4 style="color: #1e40af; margin: 0 0 8px 0;">🔵 הטבות במסלול נכות כללית - לפי הנתונים שלך:</h4>`;
     html += `<ul style="margin: 0; padding-right: 20px;">`;
     benefits.disability.forEach(b => {
       html += `<li>${b.text}</li>`;
@@ -263,7 +282,7 @@ ${input.widow.isTemporaryDisability ? 'הערה: מאחר שדרגת אי-הכו
     html += `</ul></div>`;
     
     html += `<div style="background: #dcfce7; border: 1px solid #22c55e; border-radius: 8px; padding: 12px; margin-bottom: 12px; text-align: right;">`;
-    html += `<h4 style="color: #166534; margin: 0 0 8px 0;">💚 הטבות במסלול שאירים (לפי הנתונים שלך):</h4>`;
+    html += `<h4 style="color: #166534; margin: 0 0 8px 0;">💚 הטבות במסלול שאירים - לפי הנתונים שלך:</h4>`;
     html += `<ul style="margin: 0; padding-right: 20px;">`;
     if (benefits.survivors.length > 0) {
       benefits.survivors.forEach(b => {
@@ -280,7 +299,7 @@ ${input.widow.isTemporaryDisability ? 'הערה: מאחר שדרגת אי-הכו
       <li>יש להשיב תוך 21 יום. אם לא תתקבל תשובה, תישלח תזכורת. אם לא תתקבל תשובה תוך 15 יום נוספים, נראה אותך כמי שבחר/ה בקצבה הנוכחית.</li>
       <li>הבחירה ניתנת לשינוי בעתיד אם יחול שינוי בנסיבותייך.</li>
       <li>אם תבחר/י בקצבת השאירים, ולאחר מכן זכאותך לקצבת שאירים תופסק - זכאותך לקצבת הנכות תתחדש מיד.</li>
-      <li>שים/י לב: אם את/ה מקבל/ת שר"מ (שירותים מיוחדים), בחירה בשאירים תפסיק את השר"מ הרגיל. יש לבדוק עם פקיד תביעות נכות כללית זכאות לשר"מ מיוחד - שר"מ מיוחד אינו כפל עם קצבת שאירים.</li>
+      <li>שים/י לב: אם את/ה מקבל/ת שר"מ - שירותים מיוחדים, בחירה בשאירים תפסיק את השר"מ הרגיל. יש לבדוק עם פקיד תביעות נכות כללית זכאות לשר"מ מיוחד - שר"מ מיוחד אינו כפל עם קצבת שאירים.</li>
       <li>הסכומים מעודכנים לשנת 2026 בהתאם לחוזר תשלומים 33 וכפופים לשינויים.</li>
     </ul>`;
     
@@ -292,7 +311,7 @@ ${input.widow.isTemporaryDisability ? 'הערה: מאחר שדרגת אי-הכו
   
   const generateWordTableHTML = () => {
     const g = genderize;
-    let html = `<table dir="rtl" align="right" style="border-collapse: collapse; width: 100%; font-family: Arial; direction: rtl;">`;
+    let html = `<table dir="rtl" align="right" style="border-collapse: collapse; width: 100%; font-family: David, serif; font-size: 12pt; direction: rtl;">`;
     html += `<thead><tr style="background-color: #0066CC; color: white;">`;
     html += `<th dir="rtl" align="right" style="border: 1px solid #999; padding: 8px; text-align: right;">פירוט</th>`;
     result.options.forEach((option) => {
@@ -302,7 +321,7 @@ ${input.widow.isTemporaryDisability ? 'הערה: מאחר שדרגת אי-הכו
     html += `<tr>`;
     html += `<td dir="rtl" align="right" style="border: 1px solid #ccc; padding: 6px; font-weight: bold;">${g('אלמן/נה')}</td>`;
     result.options.forEach(option => {
-      const track = option.widowTrack === 'disability' ? 'נכות' : 'שאירים';
+      const track = option.widowTrack === 'disability' ? 'קצבת נכות' : 'שאירים';
       html += `<td dir="rtl" align="center" style="border: 1px solid #ccc; padding: 6px; text-align: center;">${track}<br/><b>${option.baseAmount.toLocaleString('he-IL')} ₪</b></td>`;
     });
     html += `</tr>`;
@@ -313,7 +332,14 @@ ${input.widow.isTemporaryDisability ? 'הערה: מאחר שדרגת אי-הכו
         html += `<td dir="rtl" align="right" style="border: 1px solid #ccc; padding: 6px;">👶 ${childName}</td>`;
         result.options.forEach(option => {
           const allocation = option.childAllocations[idx];
-          const track = allocation?.track === 'disability' ? 'ילד תלוי בנכות' : 'יתום בשאירים';
+          let track: string;
+          if (allocation?.track === 'disability') {
+            track = 'תוספת ילד תלוי בנכות';
+          } else if (option.widowTrack === 'disability') {
+            track = 'קצבת שאירים';
+          } else {
+            track = 'תוספת ילד בשאירים';
+          }
           const amount = allocation?.amount || 0;
           html += `<td dir="rtl" align="center" style="border: 1px solid #ccc; padding: 6px; text-align: center;">${track}<br/>${amount > 0 ? `<b>+${amount.toLocaleString('he-IL')} ₪</b>` : 'תוספת בקצבת שאירים'}</td>`;
         });
@@ -342,11 +368,18 @@ ${input.widow.isTemporaryDisability ? 'הערה: מאחר שדרגת אי-הכו
     let html = '';
     result.options.forEach((option) => {
       html += `<p dir="rtl" align="right" style="direction: rtl; text-align: right; margin-bottom: 4px;"><b>○  אפשרות ${option.letter}' - ${option.name}</b></p>`;
-      const widowTrackLabel = option.widowTrack === 'disability' ? 'נכות' : 'שאירים';
-      html += `<p dir="rtl" align="right" style="direction: rtl; text-align: right; margin: 2px 0; padding-right: 30px;">${g('אלמן/נה')}: [${widowTrackLabel}] ${option.baseAmount.toLocaleString('he-IL')} ₪</p>`;
+      const widowTrackLabel = option.widowTrack === 'disability' ? 'קצבת נכות' : 'שאירים';
+      html += `<p dir="rtl" align="right" style="direction: rtl; text-align: right; margin: 2px 0; padding-right: 30px;">עבורך: [${widowTrackLabel}] ${option.baseAmount.toLocaleString('he-IL')} ₪</p>`;
       if (option.childAllocations) {
         option.childAllocations.forEach(allocation => {
-          const trackLabel = allocation.track === 'disability' ? 'ילד תלוי בנכות' : 'יתום בשאירים';
+          let trackLabel: string;
+          if (allocation.track === 'disability') {
+            trackLabel = 'תוספת ילד תלוי בנכות';
+          } else if (option.widowTrack === 'disability') {
+            trackLabel = 'קצבת שאירים';
+          } else {
+            trackLabel = 'תוספת ילד בשאירים';
+          }
           const amountText = allocation.amount > 0 ? `+${allocation.amount.toLocaleString('he-IL')} ₪` : 'תוספת בקצבת שאירים';
           html += `<p dir="rtl" align="right" style="direction: rtl; text-align: right; margin: 2px 0; padding-right: 30px;">${allocation.name}: [${trackLabel}] ${amountText}</p>`;
         });
@@ -362,7 +395,7 @@ ${input.widow.isTemporaryDisability ? 'הערה: מאחר שדרגת אי-הכו
   const downloadAsWord = async () => {
     try {
       const g = genderize;
-      const p = (text: string, extra = '') => `<p dir="rtl" align="right" style="direction: rtl; text-align: right; font-family: Arial; font-size: 11pt; ${extra}">${g(text)}</p>`;
+      const p = (text: string, extra = '') => `<p dir="rtl" align="right" style="direction: rtl; text-align: right; font-family: David, serif; font-size: 12pt; ${extra}">${g(text)}</p>`;
       const li = (text: string) => `<li dir="rtl" align="right" style="direction: rtl; text-align: right;">${g(text)}</li>`;
 
       // Convert logo to base64 for embedding in HTML
@@ -377,18 +410,18 @@ ${input.widow.isTemporaryDisability ? 'הערה: מאחר שדרגת אי-הכו
       let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
 <head><meta charset="utf-8"><style>
 @page { margin: 2cm; }
-body { direction: rtl; text-align: right; font-family: Arial; font-size: 11pt; }
-p, li, td, th { direction: rtl; text-align: right; }
-table { direction: rtl; }
+body { direction: rtl; text-align: right; font-family: David, serif; font-size: 12pt; }
+p, li, td, th { direction: rtl; text-align: right; font-family: David, serif; font-size: 12pt; }
+table { direction: rtl; font-family: David, serif; font-size: 12pt; }
 </style></head>
-<body dir="rtl" align="right" style="direction: rtl; text-align: right; font-family: Arial;">`;
+<body dir="rtl" align="right" style="direction: rtl; text-align: right; font-family: David, serif; font-size: 12pt;">`;
 
       html += `<div style="text-align: center; margin-bottom: 10px;"><img src="${logoBase64}" width="160" height="55" style="display: block; margin: 0 auto;" /></div>`;
-      html += `<p dir="rtl" align="right" style="direction: rtl; text-align: right; color: #0066CC; font-size: 16pt; font-weight: bold;">מאת: המוסד לביטוח לאומי</p>`;
+      html += `<p dir="rtl" align="right" style="direction: rtl; text-align: right; color: #0066CC; font-size: 16pt; font-weight: bold; font-family: David, serif;">מאת: המוסד לביטוח לאומי</p>`;
       html += p('<b>נושא: בחירה בין קצבת נכות כללית לקצבת שאירים</b>', 'font-size: 13pt;');
       html += p('שלום רב,');
       html += p('אנו משתתפים בצערך על פטירת המנוח/ה.');
-      html += p('מבדיקת הנתונים עולה כי הינך זכאי/ת הן לקצבת שאירים והן לקצבת נכות כללית. לפי חוק הביטוח הלאומי (סעיף 320), לא ניתן לקבל את שתי הקצבאות במלואן באותה תקופה, אך החוק מאפשר לך לבחור את המסלול המתאים ביותר.');
+      html += p('מבדיקת הנתונים עולה כי הינך זכאי/ת הן לקצבת שאירים והן לקצבת נכות כללית. לפי חוק הביטוח הלאומי, סעיף 320, לא ניתן לקבל את שתי הקצבאות במלואן באותה תקופה, אך החוק מאפשר לך לבחור את המסלול המתאים ביותר.');
 
       if (input.widow.isTemporaryDisability) {
         html += p('<b>הערה: מאחר שדרגת אי-הכושר נקבעה באופן זמני, יש לשלם את הקצבה הגבוהה מבין האפשרויות.</b>');
@@ -407,19 +440,19 @@ table { direction: rtl; }
       html += `<br/>`;
       html += `<p dir="rtl" align="right" style="direction: rtl; text-align: right; font-size: 13pt; font-weight: bold;">מה עוד חשוב לקחת בחשבון?</p>`;
 
-      html += p('<b>🎁 מענקים רלוונטיים (במסלול שאירים):</b>');
+      html += p('<b>🎁 מענקים רלוונטיים - במסלול שאירים:</b>');
       html += `<ul dir="rtl" style="direction: rtl; text-align: right;">`;
       benefits.grants.forEach(grant => { html += li(grant.text); });
-      html += li('מענק נישואין בעתיד (36 קצבאות חודשיות) - רלוונטי רק באפשרויות בהן את/ה במסלול שאירים. שים/י לב: עם תשלום מענק הנישואין תופסק הזכאות לקצבת שאירים עבורך.');
+      html += li('מענק נישואין בעתיד - 36 קצבאות חודשיות - רלוונטי רק באפשרויות בהן את/ה במסלול שאירים. שים/י לב: עם תשלום מענק הנישואין תופסק הזכאות לקצבת שאירים עבורך.');
       html += li('אפשרות לבחון זכאות לתוספת השלמת הכנסה');
       html += `</ul>`;
 
-      html += p('<b>🔵 הטבות במסלול נכות כללית (לפי הנתונים שלך):</b>');
+      html += p('<b>🔵 הטבות במסלול נכות כללית - לפי הנתונים שלך:</b>');
       html += `<ul dir="rtl" style="direction: rtl; text-align: right;">`;
       benefits.disability.forEach(b => { html += li(b.text); });
       html += `</ul>`;
 
-      html += p('<b>💚 הטבות במסלול שאירים (לפי הנתונים שלך):</b>');
+      html += p('<b>💚 הטבות במסלול שאירים - לפי הנתונים שלך:</b>');
       html += `<ul dir="rtl" style="direction: rtl; text-align: right;">`;
       if (benefits.survivors.length > 0) {
         benefits.survivors.forEach(b => { html += li(b.text); });
@@ -434,7 +467,7 @@ table { direction: rtl; }
       html += li('יש להשיב תוך 21 יום. אם לא תתקבל תשובה, תישלח תזכורת. אם לא תתקבל תשובה תוך 15 יום נוספים, נראה אותך כמי שבחר/ה בקצבה הנוכחית.');
       html += li('הבחירה ניתנת לשינוי בעתיד אם יחול שינוי בנסיבותייך.');
       html += li('אם תבחר/י בקצבת השאירים, ולאחר מכן זכאותך לקצבת שאירים תופסק - זכאותך לקצבת הנכות תתחדש מיד.');
-      html += li('שים/י לב: אם את/ה מקבל/ת שר"מ (שירותים מיוחדים), בחירה בשאירים תפסיק את השר"מ הרגיל. יש לבדוק עם פקיד תביעות נכות כללית זכאות לשר"מ מיוחד - שר"מ מיוחד אינו כפל עם קצבת שאירים.');
+      html += li('שים/י לב: אם את/ה מקבל/ת שר"מ - שירותים מיוחדים, בחירה בשאירים תפסיק את השר"מ הרגיל. יש לבדוק עם פקיד תביעות נכות כללית זכאות לשר"מ מיוחד - שר"מ מיוחד אינו כפל עם קצבת שאירים.');
       html += li('הסכומים מעודכנים לשנת 2026 בהתאם לחוזר תשלומים 33 וכפופים לשינויים.');
       html += `</ul>`;
 

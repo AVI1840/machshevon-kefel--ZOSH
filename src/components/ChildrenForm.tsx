@@ -147,6 +147,7 @@ const ChildrenForm = ({ children, onChange }: ChildrenFormProps) => {
             const maxAge = child.isMilitaryOrNationalService ? 24 : 20;
             const isOverAge = age !== null && age > maxAge;
             const showMilitaryToggle = age !== null && age >= 18 && age <= 24;
+            const needsStudentOrMilitarySelection = age !== null && age >= 18 && age <= 24 && !child.isStudent && !child.isMilitaryOrNationalService;
             
             return (
               <div key={child.id} className={cn(
@@ -184,7 +185,7 @@ const ChildrenForm = ({ children, onChange }: ChildrenFormProps) => {
                       <Input
                         value={getDateInput(child)}
                         onChange={(e) => handleDateInputChange(child.id, e.target.value)}
-                        placeholder="12/12/24"
+                        placeholder="dd/mm/yy"
                         className="text-right text-sm flex-1"
                         dir="ltr"
                         inputMode="numeric"
@@ -270,6 +271,12 @@ const ChildrenForm = ({ children, onChange }: ChildrenFormProps) => {
                     </div>
                   )}
                 </div>
+
+                {needsStudentOrMilitarySelection && (
+                  <p className="text-xs text-destructive font-semibold mt-2">
+                    יש לציין האם מדובר בתלמיד/ה או בשירות צבאי/לאומי
+                  </p>
+                )}
                 
                 {classification && !isOverAge && (
                   <div className="mt-3 pt-3 border-t border-border/50">

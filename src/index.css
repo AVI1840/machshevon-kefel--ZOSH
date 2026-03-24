@@ -148,3 +148,11 @@
     text-wrap: balance;
   }
 }
+
+/* === Global responsive fix === */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  -webkit-text-size-adjust: 100%;
+}
+

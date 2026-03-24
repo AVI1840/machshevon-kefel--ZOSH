@@ -78,6 +78,17 @@ export function calculateAge(birthDate: Date): number {
   return age;
 }
 
+// Calculate age in months for precise eligibility checks
+export function calculateAgeInMonths(birthDate: Date): number {
+  const today = new Date();
+  let months = (today.getFullYear() - birthDate.getFullYear()) * 12;
+  months += today.getMonth() - birthDate.getMonth();
+  if (today.getDate() < birthDate.getDate()) {
+    months--;
+  }
+  return months;
+}
+
 function calculateAgeAtDate(birthDate: Date, targetDate: Date): number {
   let age = targetDate.getFullYear() - birthDate.getFullYear();
   const monthDiff = targetDate.getMonth() - birthDate.getMonth();
@@ -91,6 +102,7 @@ export function classifyChild(child: Child, deathDate?: Date | null): ChildClass
   if (!child.birthDate) return null;
 
   const age = calculateAge(child.birthDate);
+  const ageInMonths = calculateAgeInMonths(child.birthDate);
   const barMitzvaAge = child.gender === 'male' ? 13 : 12;
 
   // Check bar mitzvah eligibility based on age at death date if available
@@ -111,12 +123,17 @@ export function classifyChild(child: Child, deathDate?: Date | null): ChildClass
     monthsTo = totalMonths % 12;
   }
 
-  const maxAge = child.isMilitaryOrNationalService ? 24 : 20;
+  // Use month-level precision for eligibility: maxAge in months
+  const maxAgeYears = child.isMilitaryOrNationalService ? 24 : 20;
+  const maxAgeMonths = maxAgeYears * 12;
+  const isEligible = ageInMonths < 18 * 12 || (ageInMonths <= maxAgeMonths && (child.isStudent || child.isMilitaryOrNationalService));
+  const isOverAge = ageInMonths > maxAgeMonths;
+
   return {
     age,
     isMinor: age < 18,
-    isEligibleForDependentAdd: age < 18 || (age <= maxAge && (child.isStudent || child.isMilitaryOrNationalService)),
-    isEligibleForLivingAllowance: age >= 14 && age <= maxAge && child.isStudent,
+    isEligibleForDependentAdd: isEligible,
+    isEligibleForLivingAllowance: ageInMonths >= 14 * 12 && ageInMonths <= maxAgeMonths && child.isStudent,
     isEligibleForBarMitzva: child.gender !== null && ageAtDeath < barMitzvaAge,
     yearsToBarMitzva: yearsTo,
     monthsToBarMitzva: monthsTo,
@@ -327,7 +344,8 @@ export function calculateOptions(input: ReadyCalculatorInput): CalculationResult
     childrenInDisability: number,
     seniorityYears: number,
     totalChildrenInSurvivors: number,
-    incapacity: number
+    incapacity: number,
+    widowTrack: 'disability' | 'survivors'
   ): ChildAllocation => {
     let amount = 0;
     let includesSeniority = false;
@@ -335,18 +353,27 @@ export function calculateOptions(input: ReadyCalculatorInput): CalculationResult
     if (track === 'disability') {
       // Track already determined by optimal allocation; just check max
       amount = getChildIncrement(incapacity);
+    } else if (widowTrack === 'survivors') {
+      // ילד בשאירים כשגם האלמן/ה בשאירים — תוספת ילד (862) עם ותק
+      const basePerChild = RATES.survivors.child_survivor; // 862 - always the increment
+      const sRate = Math.min(
+        seniorityYears * RATES.survivors.seniority_rate,
+        RATES.survivors.seniority_max
+      );
+      amount = Math.round(basePerChild * (1 + sRate));
+      includesSeniority = sRate > 0;
     } else {
-      // ילד שאיר - בודק אם הוא יחיד על המסלול
+      // ילד שאיר כשהאלמן/ה בנכות — יתום, בודק אם יחיד
       const basePerChild = totalChildrenInSurvivors === 1
         ? RATES.survivors.child_survivor_alone  // 1,142 - ילד שאיר בודד
         : RATES.survivors.child_survivor;        // 862 - ילד שאיר רגיל
 
-      const seniorityRate = Math.min(
+      const sRate = Math.min(
         seniorityYears * RATES.survivors.seniority_rate,
         RATES.survivors.seniority_max
       );
-      amount = Math.round(basePerChild * (1 + seniorityRate));
-      includesSeniority = seniorityRate > 0;
+      amount = Math.round(basePerChild * (1 + sRate));
+      includesSeniority = sRate > 0;
     }
 
     return { name, track, amount, includesSeniority };
@@ -373,7 +400,7 @@ export function calculateOptions(input: ReadyCalculatorInput): CalculationResult
     
     // Create child allocations with amounts
     const childAllocations: ChildAllocation[] = childAllocationsInput.map((ca, idx) => 
-      createChildAllocation(ca.name, ca.track, idx, childrenInDisability, deceased.seniorityYears, childrenInSurvivors, widow.incapacity)
+      createChildAllocation(ca.name, ca.track, idx, childrenInDisability, deceased.seniorityYears, childrenInSurvivors, widow.incapacity, widowTrack)
     );
     
     if (widowTrack === 'disability') {
@@ -386,35 +413,41 @@ export function calculateOptions(input: ReadyCalculatorInput): CalculationResult
       const actualChildrenInDisability = Math.min(childrenInDisability, RATES.disability.max_dependent_children);
       disabilityChildrenAddition = actualChildrenInDisability * getChildIncrement(widow.incapacity);
       if (disabilityChildrenAddition > 0) {
-        details.push({ label: `תוספת ילדים תלויים בנכות (${actualChildrenInDisability})`, value: disabilityChildrenAddition });
+        details.push({ label: `תוספת ילדים תלויים בנכות - ${actualChildrenInDisability}`, value: disabilityChildrenAddition });
         total += disabilityChildrenAddition;
       }
       
       // Children in survivors = orphans (get orphan pension + seniority)
       if (childrenInSurvivors > 0) {
         orphanPension = calcOrphanPension(childrenInSurvivors, deceased.seniorityYears);
-        details.push({ label: `קצבת יתומים (${childrenInSurvivors})`, value: orphanPension });
+        details.push({ label: `קצבת יתומים - ${childrenInSurvivors}`, value: orphanPension });
         total += orphanPension;
         
         // Living allowance for ALL eligible children if at least one child is in survivors
         if (childrenInSurvivors > 0) {
           optionLivingAllowance = livingAllowanceEligibleCount * RATES.supplements.living_allowance;
-          details.push({ label: `דמי מחיה (${livingAllowanceEligibleCount})`, value: optionLivingAllowance });
+          details.push({ label: `דמי מחיה - ${livingAllowanceEligibleCount}`, value: optionLivingAllowance });
           total += optionLivingAllowance;
         }
       }
     } else {
-      // Widow in survivors - include seniority in base amount
-      const baseWithoutSeniority = calcSurvivorsBase(widow.age, childrenInSurvivors);
-      seniorityAddition = Math.round(baseWithoutSeniority * seniorityRate);
-      baseAmount = baseWithoutSeniority + seniorityAddition;
+      // Widow in survivors - show widow-only base + seniority
+      // Children amounts are shown separately via childAllocations
+      const widowOnlyBase = widow.age >= 50 ? RATES.survivors.widow_only : RATES.survivors.widow_young;
+      seniorityAddition = Math.round(widowOnlyBase * seniorityRate);
+      baseAmount = widowOnlyBase + seniorityAddition;
       details.push({ label: `קצבת שאירים`, value: baseAmount });
       total += baseAmount;
+
+      // Add child allocation amounts to total
+      childAllocations.forEach(ca => {
+        total += ca.amount;
+      });
       
       // Living allowance for all children in survivors
       if (livingAllowanceEligibleCount > 0) {
         optionLivingAllowance = livingAllowance;
-        details.push({ label: `דמי מחיה (${livingAllowanceEligibleCount})`, value: optionLivingAllowance });
+        details.push({ label: `דמי מחיה - ${livingAllowanceEligibleCount}`, value: optionLivingAllowance });
         total += optionLivingAllowance;
       }
     }
@@ -650,34 +683,34 @@ export function getPersonalizedBenefits(input: {
   // ===== הטבות נכות =====
 
   // לכל מקבלי קצבת נכות כללית:
-  disabilityBenefits.push('50% הנחה בתחבורה ציבורית (משרד התחבורה)');
-  disabilityBenefits.push('פטור מהשתתפות עצמית - טופס 17, רופא מקצועי ועוד (קופת חולים)');
+  disabilityBenefits.push('50% הנחה בתחבורה ציבורית - משרד התחבורה');
+  disabilityBenefits.push('פטור מהשתתפות עצמית - טופס 17, רופא מקצועי ועוד - קופת חולים');
 
   // רק ל-100% אי-כושר (דרגה מלאה, 75% ומעלה):
   if (input.incapacity === 100) {
-    disabilityBenefits.push('הנחה במס רכישה - דירת מגורים/קרקע (רשות המיסים - מיסוי מקרקעין)');
-    disabilityBenefits.push('סיוע בשכר דירה או דיור ציבורי (משרד הבינוי והשיכון)');
-    disabilityBenefits.push('הנחה בארנונה - שיעור נקבע ע"י הרשות (רשות מקומית)');
+    disabilityBenefits.push('הנחה במס רכישה - דירת מגורים/קרקע - רשות המיסים - מיסוי מקרקעין');
+    disabilityBenefits.push('סיוע בשכר דירה או דיור ציבורי - משרד הבינוי והשיכון');
+    disabilityBenefits.push('הנחה בארנונה - שיעור נקבע ע"י הרשות - רשות מקומית');
   }
 
   // ===== הטבות שאירים =====
 
   // לכל מקבלי קצבת שאירים:
   if (input.age >= 67) {
-    survivorsBenefits.push('פטור מלא מתשלום בתחבורה ציבורית (מעל גיל 67)');
+    survivorsBenefits.push('פטור מלא מתשלום בתחבורה ציבורית - מעל גיל 67');
   } else {
-    survivorsBenefits.push('50% הנחה בתחבורה ציבורית (משרד התחבורה)');
+    survivorsBenefits.push('50% הנחה בתחבורה ציבורית - משרד התחבורה');
   }
 
   // מענק עבודה - לעובדים עד רמת שכר מסוימת:
-  survivorsBenefits.push('אפשרות למענק עבודה ("מס הכנסה שלילי") - לעובדים עד רמת שכר מסוימת (רשות המיסים)');
+  survivorsBenefits.push('אפשרות למענק עבודה "מס הכנסה שלילי" - לעובדים עד רמת שכר מסוימת - רשות המיסים');
 
   // הנחה בארנונה - מעל גיל פרישה, או עם השלמת הכנסה:
   const retirementAge = input.gender === 'male' ? 67 : 62;
   if (input.age >= retirementAge || input.hasIncomeSupport) {
-    survivorsBenefits.push('הנחה בארנונה - שיעור נקבע ע"י הרשות (רשות מקומית)');
+    survivorsBenefits.push('הנחה בארנונה - שיעור נקבע ע"י הרשות - רשות מקומית');
   } else {
-    survivorsBenefits.push('הנחה בארנונה - בכפוף לקבלת תוספת השלמת הכנסה (רשות מקומית)');
+    survivorsBenefits.push('הנחה בארנונה - בכפוף לקבלת תוספת השלמת הכנסה - רשות מקומית');
   }
 
   return { disabilityBenefits, survivorsBenefits };
@@ -717,7 +750,7 @@ export function calculateBenefits(input: ReadyCalculatorInput): BenefitsResult {
     
     if (classification.isEligibleForLivingAllowance) {
       benefits.grants.push({
-        text: `דמי מחיה ל${child.name || 'ילד/ה'} (${RATES.supplements.living_allowance} ₪/חודש)`,
+        text: `דמי מחיה ל${child.name || 'ילד/ה'} - ${RATES.supplements.living_allowance} ₪/חודש`,
         note: 'לתלמידים בגילאי 14-20'
       });
     }
@@ -740,7 +773,7 @@ export function calculateBenefits(input: ReadyCalculatorInput): BenefitsResult {
       }
 
       benefits.grants.push({
-        text: `מענק ${classification.barMitzvaType} ל${child.name || 'ילד/ה'} (${RATES.supplements.bar_mitzva_grant.toLocaleString()} ₪) - ${yearsText}`
+        text: `מענק ${classification.barMitzvaType} ל${child.name || 'ילד/ה'} - ${RATES.supplements.bar_mitzva_grant.toLocaleString()} ₪ - ${yearsText}`
       });
     }
   });

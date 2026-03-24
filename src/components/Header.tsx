@@ -17,7 +17,7 @@ const Header = () => {
               </div>
               <div>
                 <h1 className="text-xl font-bold">מחשבון כפל גמלאות</h1>
-                <p className="text-xs opacity-80">סעיף 320 | אביעד יצחקי, מינהל גמלאות</p>
+                <p className="text-xs opacity-80">סעיף 320 | אביעד יצחקי, מינהלי גמלאות, ביטוח לאומי</p>
               </div>
             </div>
             <Button

@@ -76,7 +76,7 @@ const ResultsTable = ({ result }: ResultsTableProps) => {
                     "px-2 py-1 rounded text-xs font-medium",
                     option.widowTrack === 'disability' ? "bg-primary/10 text-primary" : "bg-success/10 text-success"
                   )}>
-                    {option.widowTrack === 'disability' ? 'נכות' : 'שאירים'}
+                    {option.widowTrack === 'disability' ? 'קצבת נכות' : 'שאירים'}
                   </span>
                   <div className="text-sm mt-1 font-medium">
                     {`${option.baseAmount.toLocaleString()} ₪`}
@@ -119,7 +119,7 @@ const ResultsTable = ({ result }: ResultsTableProps) => {
                         "px-2 py-1 rounded text-xs font-medium",
                         allocation.track === 'disability' ? "bg-primary/10 text-primary" : "bg-success/10 text-success"
                       )}>
-                        {allocation.track === 'disability' ? 'ילד תלוי בנכות' : 'יתום בשאירים'}
+                        {allocation.track === 'disability' ? 'תוספת ילד תלוי בנכות' : 'תוספת ילד בשאירים'}
                       </span>
                       {childAmount && (
                         <div className="text-sm mt-1 font-medium">{childAmount}</div>

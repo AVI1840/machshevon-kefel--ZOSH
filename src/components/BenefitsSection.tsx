@@ -22,7 +22,7 @@ const BenefitsSection = ({ benefits }: BenefitsSectionProps) => {
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <h3 className="font-semibold text-yellow-800 flex items-center gap-2 mb-3">
             <Gift className="w-4 h-4" />
-            🎁 מענקים רלוונטיים (במסלול שאירים):
+            🎁 מענקים רלוונטיים - במסלול שאירים:
           </h3>
           <ul className="space-y-2">
             {benefits.grants.map((grant, index) => (
@@ -39,7 +39,7 @@ const BenefitsSection = ({ benefits }: BenefitsSectionProps) => {
             {/* Marriage grant - conditional note */}
             <li className="flex items-start gap-2 text-sm text-yellow-900">
               <span className="text-yellow-600 mt-1">•</span>
-              <span>מענק נישואין (36 קצבאות חודשיות) - <strong>רלוונטי רק באפשרויות בהן את/ה במסלול שאירים.</strong> שים/י לב: עם תשלום מענק הנישואין תופסק הזכאות לקצבת שאירים עבורך.</span>
+              <span>מענק נישואין - 36 קצבאות חודשיות - <strong>רלוונטי רק באפשרויות בהן את/ה במסלול שאירים.</strong> שים/י לב: עם תשלום מענק הנישואין תופסק הזכאות לקצבת שאירים עבורך.</span>
             </li>
             {/* Income supplement option */}
             <li className="flex items-start gap-2 text-sm text-yellow-900">
@@ -53,7 +53,7 @@ const BenefitsSection = ({ benefits }: BenefitsSectionProps) => {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <h3 className="font-semibold text-blue-800 flex items-center gap-2 mb-3">
             <Shield className="w-4 h-4" />
-            🔵 הטבות במסלול נכות כללית (לפי הנתונים שלך):
+            🔵 הטבות במסלול נכות כללית - לפי הנתונים שלך:
           </h3>
           <ul className="space-y-2">
             {benefits.disability.map((benefit, index) => (
@@ -74,7 +74,7 @@ const BenefitsSection = ({ benefits }: BenefitsSectionProps) => {
         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
           <h3 className="font-semibold text-green-800 flex items-center gap-2 mb-3">
             <Heart className="w-4 h-4" />
-            💚 הטבות במסלול שאירים (לפי הנתונים שלך):
+            💚 הטבות במסלול שאירים - לפי הנתונים שלך:
           </h3>
           <ul className="space-y-2">
             {benefits.survivors.length > 0 ? (
@@ -96,7 +96,7 @@ const BenefitsSection = ({ benefits }: BenefitsSectionProps) => {
         {/* Special Mobility Benefit note */}
         <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
           <p className="text-sm text-orange-900">
-            <strong>שים/י לב:</strong> אם את/ה מקבל/ת שר"מ (שירותים מיוחדים), בחירה בשאירים תפסיק את השר"מ הרגיל. יש לבדוק עם פקיד תביעות נכות כללית זכאות לשר"מ מיוחד - שר"מ מיוחד אינו כפל עם קצבת שאירים.
+            <strong>שים/י לב:</strong> אם את/ה מקבל/ת שר"מ - שירותים מיוחדים, בחירה בשאירים תפסיק את השר"מ הרגיל. יש לבדוק עם פקיד תביעות נכות כללית זכאות לשר"מ מיוחד - שר"מ מיוחד אינו כפל עם קצבת שאירים.
           </p>
         </div>
       </div>

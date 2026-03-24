@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 
 interface FeedbackModalProps { open: boolean; onClose: () => void; }
 
-const STORAGE_KEY = "btl-feedback-calculator-overlap";
+const STORAGE_KEY = "btl-feedback-choice-wizard";
 const APP_NAME = "מחשבון כפל גמלאות";
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbwD8CMFoP5XoOwRLwK_OxMMOFKF8fS2CRpbJkNdOHjbnJIepkOLzlGrg3GQNGRqbwB6bA/exec";
 const NAME_KEY = "btl-feedback-user-name";
