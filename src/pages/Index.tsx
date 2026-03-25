@@ -209,6 +209,7 @@ const Index = () => {
         <footer className="mt-12 pt-6 border-t border-border text-center text-sm text-muted-foreground">
           <p>הסכומים מעודכנים לשנת 2026 וכפופים לשינויים (חוזר תשלומים 33)</p>
           <p className="mt-1">אביעד יצחקי, מינהל גמלאות | ביטוח לאומי | v1.0 | מרץ 2026</p>
+          <p className="mt-1 opacity-60 text-xs">עדכון אחרון: 24.03.2026</p>
         </footer>
       </main>
     </div>
