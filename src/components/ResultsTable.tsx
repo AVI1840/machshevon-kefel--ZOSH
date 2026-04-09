@@ -79,7 +79,7 @@ const ResultsTable = ({ result }: ResultsTableProps) => {
                     {option.widowTrack === 'disability' ? 'קצבת נכות' : 'שאירים'}
                   </span>
                   <div className="text-sm mt-1 font-medium">
-                    {`${option.baseAmount.toLocaleString()} ₪`}
+                    {`${option.baseAmount.toLocaleString()} ש"ח`}
                   </div>
                 </td>
               ))}
@@ -100,11 +100,11 @@ const ResultsTable = ({ result }: ResultsTableProps) => {
                   let childAmount = '';
                   if (allocation.track === 'disability') {
                     if (allocation.amount > 0) {
-                      childAmount = `+${allocation.amount.toLocaleString()} ₪`;
+                      childAmount = `+${allocation.amount.toLocaleString()} ש"ח`;
                     }
                   } else {
                     if (allocation.amount > 0) {
-                      childAmount = `+${allocation.amount.toLocaleString()} ₪`;
+                      childAmount = `+${allocation.amount.toLocaleString()} ש"ח`;
                     } else {
                       childAmount = 'כלול בקצבה';
                     }
@@ -150,7 +150,7 @@ const ResultsTable = ({ result }: ResultsTableProps) => {
                     "text-center py-3 px-4",
                     option.total === maxTotal && "bg-success/5"
                   )}>
-                    {option.livingAllowance > 0 ? `${option.livingAllowance.toLocaleString()} ₪` : '-'}
+                    {option.livingAllowance > 0 ? `${option.livingAllowance.toLocaleString()} ש"ח` : '-'}
                   </td>
                 ))}
               </tr>
@@ -164,7 +164,7 @@ const ResultsTable = ({ result }: ResultsTableProps) => {
                   "text-center py-4 px-4 text-lg",
                   option.total === maxTotal ? "bg-success/20 text-success" : "text-foreground"
                 )}>
-                  {option.total.toLocaleString()} ₪
+                  {option.total.toLocaleString()} ש"ח
                 </td>
               ))}
             </tr>

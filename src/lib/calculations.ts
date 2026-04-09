@@ -750,7 +750,7 @@ export function calculateBenefits(input: ReadyCalculatorInput): BenefitsResult {
     
     if (classification.isEligibleForLivingAllowance) {
       benefits.grants.push({
-        text: `דמי מחיה ל${child.name || 'ילד/ה'} - ${RATES.supplements.living_allowance} ₪/חודש`,
+        text: `דמי מחיה ל${child.name || 'ילד/ה'} - ${RATES.supplements.living_allowance} ש"ח/חודש`,
         note: 'לתלמידים בגילאי 14-20'
       });
     }
@@ -773,7 +773,7 @@ export function calculateBenefits(input: ReadyCalculatorInput): BenefitsResult {
       }
 
       benefits.grants.push({
-        text: `מענק ${classification.barMitzvaType} ל${child.name || 'ילד/ה'} - ${RATES.supplements.bar_mitzva_grant.toLocaleString()} ₪ - ${yearsText}`
+        text: `מענק ${classification.barMitzvaType} ל${child.name || 'ילד/ה'} - ${RATES.supplements.bar_mitzva_grant.toLocaleString()} ש"ח - ${yearsText}`
       });
     }
   });

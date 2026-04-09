@@ -69,7 +69,7 @@ const ActionButtons = ({ result, benefits, input, onReset }: ActionButtonsProps)
       const bgColor = option.widowTrack === 'disability' ? '#dbeafe' : '#dcfce7';
       html += `<td style="border: 1px solid #ccc; padding: 8px; text-align: center;">
         <span style="background: ${bgColor}; padding: 2px 8px; border-radius: 4px; font-size: 12px;">${track}</span><br>
-        <strong>${option.baseAmount.toLocaleString('he-IL')} ₪</strong>
+        <strong>${option.baseAmount.toLocaleString('he-IL')} ש"ח</strong>
       </td>`;
     });
     html += `</tr>`;
@@ -95,7 +95,7 @@ const ActionButtons = ({ result, benefits, input, onReset }: ActionButtonsProps)
           const amount = allocation?.amount || 0;
           html += `<td style="border: 1px solid #ccc; padding: 8px; text-align: center;">
             <span style="background: ${bgColor}; padding: 2px 8px; border-radius: 4px; font-size: 12px;">${track}</span><br>
-            ${amount > 0 ? `<strong>+${amount.toLocaleString('he-IL')} ₪</strong>` : '<small>תוספת בקצבת שאירים</small>'}
+            ${amount > 0 ? `<strong>+${amount.toLocaleString('he-IL')} ש"ח</strong>` : '<small>תוספת בקצבת שאירים</small>'}
           </td>`;
         });
         html += `</tr>`;
@@ -106,7 +106,7 @@ const ActionButtons = ({ result, benefits, input, onReset }: ActionButtonsProps)
     if (result.livingAllowanceEligibleCount > 0) {
       html += `<tr><td style="border: 1px solid #ccc; padding: 8px;">דמי מחיה</td>`;
       result.options.forEach(option => {
-        html += `<td style="border: 1px solid #ccc; padding: 8px; text-align: center;">${option.livingAllowance > 0 ? `${option.livingAllowance.toLocaleString('he-IL')} ₪` : '-'}</td>`;
+        html += `<td style="border: 1px solid #ccc; padding: 8px; text-align: center;">${option.livingAllowance > 0 ? `${option.livingAllowance.toLocaleString('he-IL')} ש"ח` : '-'}</td>`;
       });
       html += `</tr>`;
     }
@@ -114,7 +114,7 @@ const ActionButtons = ({ result, benefits, input, onReset }: ActionButtonsProps)
     // Total row
     html += `<tr style="background: #f0f9ff; font-weight: bold;"><td style="border: 1px solid #ccc; padding: 10px;">💰 סה"כ לחודש</td>`;
     result.options.forEach(option => {
-      html += `<td style="border: 1px solid #ccc; padding: 10px; text-align: center; font-size: 18px;">${option.total.toLocaleString('he-IL')} ₪</td>`;
+      html += `<td style="border: 1px solid #ccc; padding: 10px; text-align: center; font-size: 18px;">${option.total.toLocaleString('he-IL')} ש"ח</td>`;
     });
     html += `</tr>`;
     
@@ -127,9 +127,9 @@ const ActionButtons = ({ result, benefits, input, onReset }: ActionButtonsProps)
     
     result.options.forEach((option, index) => {
       const letter = ['א', 'ב', 'ג', 'ד'][index];
-      text += `אפשרות ${letter}' - ${option.name}\n`;
+      text += `אפשרות ${letter}' : ${option.name} - סה"כ ${option.total.toLocaleString('he-IL')} ש"ח לחודש:\n`;
       const widowType = option.widowTrack === 'disability' ? 'קצבת נכות' : 'שאירים';
-      text += `  • עבורך: [${widowType}] ${option.baseAmount.toLocaleString('he-IL')} ₪\n`;
+      text += `  עבורך: ${widowType} ${option.baseAmount.toLocaleString('he-IL')} ש"ח\n`;
       
       if (option.childAllocations) {
         option.childAllocations.forEach(childData => {
@@ -142,14 +142,14 @@ const ActionButtons = ({ result, benefits, input, onReset }: ActionButtonsProps)
             trackLabel = 'תוספת ילד בשאירים';
           }
           if (childData.amount > 0) {
-            text += `  • ${childData.name}: [${trackLabel}] +${childData.amount.toLocaleString('he-IL')} ₪\n`;
+            text += `  ${childData.name}: ${trackLabel} +${childData.amount.toLocaleString('he-IL')} ש"ח\n`;
           } else {
-            text += `  • ${childData.name}: תוספת בקצבת שאירים\n`;
+            text += `  ${childData.name}: תוספת בקצבת שאירים\n`;
           }
         });
       }
       
-      text += `  • סה"כ לחודש: ${option.total.toLocaleString('he-IL')} ₪\n\n`;
+      text += `\n`;
     });
     
     return genderize(text);
@@ -216,11 +216,11 @@ ${input.widow.isTemporaryDisability ? 'הערה: מאחר שדרגת אי-הכו
     result.options.forEach((option, index) => {
       const letter = ['א', 'ב', 'ג', 'ד'][index];
       html += `<div style="margin-bottom: 16px; text-align: right;">`;
-      html += `<p style="font-weight: bold; margin-bottom: 8px;">אפשרות ${letter}' - ${option.name}</p>`;
-      html += `<ul style="margin: 0; padding-right: 20px; list-style-type: disc;">`;
+      html += `<p style="font-weight: bold; margin-bottom: 8px;">אפשרות ${letter}' : ${option.name} - סה"כ ${option.total.toLocaleString('he-IL')} ש"ח לחודש:</p>`;
+      html += `<ul style="margin: 0; padding-right: 20px; list-style-type: none;">`;
       
       const widowType = option.widowTrack === 'disability' ? 'קצבת נכות' : 'שאירים';
-      html += `<li>עבורך: [${widowType}] ${option.baseAmount.toLocaleString('he-IL')} ₪</li>`;
+      html += `<li>עבורך: ${widowType} ${option.baseAmount.toLocaleString('he-IL')} ש"ח</li>`;
       
       if (option.childAllocations) {
         option.childAllocations.forEach(childData => {
@@ -233,14 +233,13 @@ ${input.widow.isTemporaryDisability ? 'הערה: מאחר שדרגת אי-הכו
             trackLabel = 'תוספת ילד בשאירים';
           }
           if (childData.amount > 0) {
-            html += `<li>${childData.name}: [${trackLabel}] +${childData.amount.toLocaleString('he-IL')} ₪</li>`;
+            html += `<li>${childData.name}: ${trackLabel} +${childData.amount.toLocaleString('he-IL')} ש"ח</li>`;
           } else {
             html += `<li>${childData.name}: תוספת בקצבת שאירים</li>`;
           }
         });
       }
       
-      html += `<li><strong>סה"כ לחודש: ${option.total.toLocaleString('he-IL')} ₪</strong></li>`;
       html += `</ul></div>`;
     });
     
@@ -322,7 +321,7 @@ ${input.widow.isTemporaryDisability ? 'הערה: מאחר שדרגת אי-הכו
     html += `<td dir="rtl" align="right" style="border: 1px solid #ccc; padding: 6px; font-weight: bold;">עבורך</td>`;
     result.options.forEach(option => {
       const track = option.widowTrack === 'disability' ? 'קצבת נכות' : 'שאירים';
-      html += `<td dir="rtl" align="center" style="border: 1px solid #ccc; padding: 6px; text-align: center;">${track}<br/><b>${option.baseAmount.toLocaleString('he-IL')} ₪</b></td>`;
+      html += `<td dir="rtl" align="center" style="border: 1px solid #ccc; padding: 6px; text-align: center;">${track}<br/><b>${option.baseAmount.toLocaleString('he-IL')} ש"ח</b></td>`;
     });
     html += `</tr>`;
     if (result.eligibleChildrenCount > 0 && result.options[0]?.childAllocations) {
@@ -341,7 +340,7 @@ ${input.widow.isTemporaryDisability ? 'הערה: מאחר שדרגת אי-הכו
             track = 'תוספת ילד בשאירים';
           }
           const amount = allocation?.amount || 0;
-          html += `<td dir="rtl" align="center" style="border: 1px solid #ccc; padding: 6px; text-align: center;">${track}<br/>${amount > 0 ? `<b>+${amount.toLocaleString('he-IL')} ₪</b>` : 'תוספת בקצבת שאירים'}</td>`;
+          html += `<td dir="rtl" align="center" style="border: 1px solid #ccc; padding: 6px; text-align: center;">${track}<br/>${amount > 0 ? `<b>+${amount.toLocaleString('he-IL')} ש"ח</b>` : 'תוספת בקצבת שאירים'}</td>`;
         });
         html += `</tr>`;
       });
@@ -350,14 +349,14 @@ ${input.widow.isTemporaryDisability ? 'הערה: מאחר שדרגת אי-הכו
       html += `<tr>`;
       html += `<td dir="rtl" align="right" style="border: 1px solid #ccc; padding: 6px;">דמי מחיה</td>`;
       result.options.forEach(option => {
-        html += `<td dir="rtl" align="center" style="border: 1px solid #ccc; padding: 6px; text-align: center;">${option.livingAllowance > 0 ? `${option.livingAllowance.toLocaleString('he-IL')} ₪` : '-'}</td>`;
+        html += `<td dir="rtl" align="center" style="border: 1px solid #ccc; padding: 6px; text-align: center;">${option.livingAllowance > 0 ? `${option.livingAllowance.toLocaleString('he-IL')} ש"ח` : '-'}</td>`;
       });
       html += `</tr>`;
     }
     html += `<tr style="background-color: #f0f9ff;">`;
     html += `<td dir="rtl" align="right" style="border: 1px solid #ccc; padding: 8px; font-weight: bold;">💰 סה"כ לחודש</td>`;
     result.options.forEach(option => {
-      html += `<td dir="rtl" align="center" style="border: 1px solid #ccc; padding: 8px; text-align: center; font-weight: bold; font-size: 14pt;">${option.total.toLocaleString('he-IL')} ₪</td>`;
+      html += `<td dir="rtl" align="center" style="border: 1px solid #ccc; padding: 8px; text-align: center; font-weight: bold; font-size: 14pt;">${option.total.toLocaleString('he-IL')} ש"ח</td>`;
     });
     html += `</tr></tbody></table>`;
     return html;
@@ -367,9 +366,9 @@ ${input.widow.isTemporaryDisability ? 'הערה: מאחר שדרגת אי-הכו
     const g = genderize;
     let html = '';
     result.options.forEach((option) => {
-      html += `<p dir="rtl" align="right" style="direction: rtl; text-align: right; margin-bottom: 4px;"><b>○  אפשרות ${option.letter}' - ${option.name}</b></p>`;
+      html += `<p dir="rtl" align="right" style="direction: rtl; text-align: right; margin-bottom: 4px;"><b>אפשרות ${option.letter}' : ${option.name} - סה"כ ${option.total.toLocaleString('he-IL')} ש"ח לחודש:</b></p>`;
       const widowTrackLabel = option.widowTrack === 'disability' ? 'קצבת נכות' : 'שאירים';
-      html += `<p dir="rtl" align="right" style="direction: rtl; text-align: right; margin: 2px 0; padding-right: 30px;">עבורך: [${widowTrackLabel}] ${option.baseAmount.toLocaleString('he-IL')} ₪</p>`;
+      html += `<p dir="rtl" align="right" style="direction: rtl; text-align: right; margin: 2px 0; padding-right: 30px;">עבורך: ${widowTrackLabel} ${option.baseAmount.toLocaleString('he-IL')} ש"ח</p>`;
       if (option.childAllocations) {
         option.childAllocations.forEach(allocation => {
           let trackLabel: string;
@@ -380,14 +379,14 @@ ${input.widow.isTemporaryDisability ? 'הערה: מאחר שדרגת אי-הכו
           } else {
             trackLabel = 'תוספת ילד בשאירים';
           }
-          const amountText = allocation.amount > 0 ? `+${allocation.amount.toLocaleString('he-IL')} ₪` : 'תוספת בקצבת שאירים';
-          html += `<p dir="rtl" align="right" style="direction: rtl; text-align: right; margin: 2px 0; padding-right: 30px;">${allocation.name}: [${trackLabel}] ${amountText}</p>`;
+          const amountText = allocation.amount > 0 ? `+${allocation.amount.toLocaleString('he-IL')} ש"ח` : 'תוספת בקצבת שאירים';
+          html += `<p dir="rtl" align="right" style="direction: rtl; text-align: right; margin: 2px 0; padding-right: 30px;">${allocation.name}: ${trackLabel} ${amountText}</p>`;
         });
       }
       if (option.livingAllowance > 0) {
-        html += `<p dir="rtl" align="right" style="direction: rtl; text-align: right; margin: 2px 0; padding-right: 30px;">דמי מחיה: ${option.livingAllowance.toLocaleString('he-IL')} ₪</p>`;
+        html += `<p dir="rtl" align="right" style="direction: rtl; text-align: right; margin: 2px 0; padding-right: 30px;">דמי מחיה: ${option.livingAllowance.toLocaleString('he-IL')} ש"ח</p>`;
       }
-      html += `<p dir="rtl" align="right" style="direction: rtl; text-align: right; margin: 2px 0 12px 0; padding-right: 30px;"><b>סה"כ לחודש: ${option.total.toLocaleString('he-IL')} ₪</b></p>`;
+      html += `<p dir="rtl" align="right" style="direction: rtl; text-align: right; margin: 2px 0 12px 0;"></p>`;
     });
     return html;
   };
@@ -533,7 +532,7 @@ table { direction: rtl; font-family: David, serif; font-size: 12pt; }
     try {
       const html = generateTableHTML();
       const plainText = result.options.map((option) => 
-        `אפשרות ${option.letter}' (${option.name}): ${option.total.toLocaleString()} ₪`
+        `אפשרות ${option.letter}' - ${option.name}: ${option.total.toLocaleString()} ש"ח`
       ).join('\n');
       
       try {
