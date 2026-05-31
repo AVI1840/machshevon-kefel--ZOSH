@@ -314,7 +314,6 @@ export function calculateOptions(input: ReadyCalculatorInput): CalculationResult
   const seniorityRate = Math.min(deceased.seniorityYears * RATES.survivors.seniority_rate, RATES.survivors.seniority_max);
   const disabilityBase = widow.disabilityAmount || getDisabilityBaseAmount(widow.incapacity);
   const childIncrement = getChildIncrement(widow.incapacity);
-  const livingAllowance = livingAllowanceEligibleCount * RATES.supplements.living_allowance;
 
   // Exception: Temporary disability higher than survivors, no income support
   if (widow.isTemporaryDisability && !widow.hasIncomeSupport) {
@@ -423,9 +422,9 @@ export function calculateOptions(input: ReadyCalculatorInput): CalculationResult
         details.push({ label: `קצבת יתומים - ${childrenInSurvivors}`, value: orphanPension });
         total += orphanPension;
         
-        // Living allowance for ALL eligible children if at least one child is in survivors
-        if (childrenInSurvivors > 0) {
-          optionLivingAllowance = livingAllowanceEligibleCount * RATES.supplements.living_allowance;
+        // Living allowance for disability track = 9% (946)
+        if (livingAllowanceEligibleCount > 0) {
+          optionLivingAllowance = livingAllowanceEligibleCount * RATES.supplements.living_allowance_high;
           details.push({ label: `דמי מחיה - ${livingAllowanceEligibleCount}`, value: optionLivingAllowance });
           total += optionLivingAllowance;
         }
@@ -433,7 +432,10 @@ export function calculateOptions(input: ReadyCalculatorInput): CalculationResult
     } else {
       // Widow in survivors - show widow-only base + seniority
       // Children amounts are shown separately via childAllocations
-      const widowOnlyBase = widow.age >= 50 ? RATES.survivors.widow_only : RATES.survivors.widow_young;
+      // אלמן/ה מתחת ל-50 עם ילד מקבל/ת שיעור מלא (1838) כמו מעל 50
+      const widowOnlyBase = (widow.age >= 50 || childrenInSurvivors > 0)
+        ? RATES.survivors.widow_only
+        : RATES.survivors.widow_young;
       seniorityAddition = Math.round(widowOnlyBase * seniorityRate);
       baseAmount = widowOnlyBase + seniorityAddition;
       details.push({ label: `קצבת שאירים`, value: baseAmount });
@@ -444,9 +446,9 @@ export function calculateOptions(input: ReadyCalculatorInput): CalculationResult
         total += ca.amount;
       });
       
-      // Living allowance for all children in survivors
+      // Living allowance for survivors track = 6.5% (683)
       if (livingAllowanceEligibleCount > 0) {
-        optionLivingAllowance = livingAllowance;
+        optionLivingAllowance = livingAllowanceEligibleCount * RATES.supplements.living_allowance;
         details.push({ label: `דמי מחיה - ${livingAllowanceEligibleCount}`, value: optionLivingAllowance });
         total += optionLivingAllowance;
       }
@@ -475,11 +477,12 @@ export function calculateOptions(input: ReadyCalculatorInput): CalculationResult
   const childNames = classifiedChildren.map(c => c.child.name || 'ילד/ה');
 
   // Optimal allocation helper
+  // כשהאלמנ/ה בנכות, דמי המחיה הם 9% (946) ולא 6.5% (683)
   const optimalAlloc = (numInDisability: number) => findOptimalAllocation(
     classifiedChildren as { child: Child; classification: ChildClassification }[],
     numInDisability, childIncrement,
     RATES.survivors.child_survivor, RATES.survivors.child_survivor_alone,
-    RATES.supplements.living_allowance, seniorityRate
+    RATES.supplements.living_allowance_high, seniorityRate
   );
 
   // ============ CASE: No children ============
