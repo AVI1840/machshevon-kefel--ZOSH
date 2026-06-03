@@ -161,7 +161,10 @@ const WidowForm = ({ data, onChange, pristine = false }: WidowFormProps) => {
         </div>
 
         <div className="md:col-span-2 lg:col-span-3 space-y-3">
-          <p className="text-xs text-muted-foreground">לחישוב מדויק של קיזוז הכנסות - פנה/י לפקיד תביעות</p>
+          <div className="p-3 bg-amber-50 border border-amber-300 rounded-lg flex items-start gap-2">
+            <span className="text-amber-600 text-lg leading-none mt-0.5">⚠️</span>
+            <p className="text-sm text-amber-900 font-medium">לחישוב מדויק של קיזוז הכנסות — יש לפנות לפקיד תביעות</p>
+          </div>
           
           <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
             <div>
