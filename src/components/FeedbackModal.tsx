@@ -6,10 +6,10 @@ import { Input } from "@/components/ui/input";
 
 interface FeedbackModalProps { open: boolean; onClose: () => void; }
 
-const STORAGE_KEY = "btl-feedback-choice-wizard";
+const STORAGE_KEY = "btl-kefel-gmlaot-feedback";
 const APP_NAME = "מחשבון כפל גמלאות";
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbwD8CMFoP5XoOwRLwK_OxMMOFKF8fS2CRpbJkNdOHjbnJIepkOLzlGrg3GQNGRqbwB6bA/exec";
-const NAME_KEY = "btl-feedback-user-name";
+const NAME_KEY = "btl-kefel-gmlaot-feedback-user-name";
 
 type Category = "🐛 באג" | "💡 שיפור" | "📊 נתונים" | "🎨 עיצוב";
 type Severity = "קריטי" | "שיפור" | "קטן";
