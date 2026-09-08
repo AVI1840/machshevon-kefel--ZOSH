@@ -166,17 +166,6 @@ const WidowForm = ({ data, onChange, pristine = false }: WidowFormProps) => {
             <p className="text-sm text-amber-900 font-medium">לחישוב מדויק של קיזוז הכנסות — יש לפנות לפקיד תביעות</p>
           </div>
           
-          <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-            <div>
-              <Label htmlFor="incomeSupport" className="form-label mb-0">זכאי/ת להשלמת הכנסה בשאירים?</Label>
-              <p className="text-xs text-muted-foreground">משפיע על הטבות שאירים</p>
-            </div>
-            <Switch
-              id="incomeSupport"
-              checked={data.hasIncomeSupport}
-              onCheckedChange={(checked) => onChange({ ...data, hasIncomeSupport: checked })}
-            />
-          </div>
 
         </div>
       </div>
